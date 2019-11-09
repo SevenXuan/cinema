@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.LanguageTypeMapper">
+
+	<!-- 查询所有影片信息的结果集 -->
+	<resultMap type="LanguageType" id="languagetypeMap">
+		<id property="id" column="lt_id" />
+		<result property="type" column="lt_type" />
+	</resultMap>
+
+
+	<!-- 查询语种信息 -->
+	<select id="select" parameterType="map" resultMap="languagetypeMap">
+		select * from t_languagetype
+	</select>
+
+
+	<!-- 查询单个语种 -->
+	<select id="unique" parameterType="LanguageType" resultMap="languagetypeMap">
+		select lt_type
+		from t_languagetype
+		where lt_id = #{id }
+	</select>
+	
+	
+	<insert id="add" parameterType="LanguageType">
+		insert into t_languagetype
+		(lt_id,lt_type)
+		values
+		(#{id },#{type })
+	</insert>
+
+
+	<select id="count" parameterType="map" resultType="int">
+		select count(lt_id) from t_languagetype
+	</select>
+	
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

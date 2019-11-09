@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.MovieMapper">
+
+	<!-- 查询所有影片信息的结果集 -->
+	<resultMap type="Movie" id="movieMap">
+		<id property="id" column="m_id" />
+		<result property="name" column="m_name" />
+		<result property="intro" column="m_intro" />
+		<result property="score" column="m_score" />
+		<result property="lTid" column="m_lTid" />
+		<result property="mTid" column="m_mTid" />
+		<result property="producer" column="m_producer" />
+		<result property="issure" column="m_issure" />
+		<result property="director" column="m_director" />
+		<result property="actor" column="m_actor" />
+		<result property="duration" column="m_duration" />
+		<result property="time" column="m_time" />
+		<result property="expiringDate" column="m_expiringDate" />
+		<result property="count" column="m_count" />
+		<result property="condition" column="m_condition"/>
+	</resultMap>
+
+
+	<!-- 分页查询影片信息 -->
+	<select id="select" parameterType="map" resultMap="movieMap">
+		select * from t_movie
+		<where>
+			<if test="keyword != null">
+				(m_name like concat('%',#{keyword},'%') or m_intro like concat('%',#{keyword},'%')
+				or m_actor like concat('%',#{keyword},'%') or m_director like concat('%',#{keyword},'%') ),
+			</if>
+			<if test="id != null">
+				m_id = #{id}
+			</if>
+		</where>
+		<if test="start != null and size != null">
+			limit #{start},#{size}
+		</if>
+	</select>
+	
+	
+	<!-- 修改影片信息 -->
+	<update id="update" parameterType="Movie">
+		update t_movie
+		<set>
+			<if test="name != null">
+				m_name = #{name},
+			</if>
+			<if test="intro != null">
+				m_intro = #{intro},
+			</if>
+			<if test="score != null">
+				m_score = #{score},
+			</if>
+			<if test="lTid != null">
+				m_lTid = #{lTid},
+			</if>
+			<if test="mTid != null">
+				m_mTid = #{mTid},
+			</if>
+			<if test="producer != null">
+				m_producer = #{producer},
+			</if>
+			<if test="issure != null">
+				m_issure = #{issure},
+			</if>
+			<if test="director != null">
+				m_director = #{director},
+			</if>
+			<if test="actor != null">
+				m_actor = #{actor},
+			</if>
+			<if test="duration != null">
+				m_duration = #{duration},
+			</if>
+			<if test="time != null">
+				m_time = #{time},
+			</if>
+			<if test="expiringDate != null">
+				m_expiringDate = #{expiringDate},
+			</if>
+			<if test="count != null">
+				m_count = #{count},
+			</if>
+			<if test="grossed != null">
+				m_grossed = #{grossed},
+			</if>
+			<if test="condition != null">
+				m_condition = #{condition}
+			</if>
+		</set>
+		where m_id = #{id}
+	</update>
+
+	<!-- 添加影片 -->
+	<insert id="add" parameterType="Movie">
+		insert into t_movie
+		(`m_name`,`m_intro`,`m_score`,`m_lTid`,`m_mTid`,`m_producer`,`m_issuer`
+			,`m_director`,`m_actor`,`m_duration`,`m_time`,`m_expiringDate`,`m_count`,`m_condition`)
+		values(#{name },#{intro },#{score },#{lTid },#{mTid},#{producer },#{issure }
+			,#{director },#{actor },#{duration },#{time },#{expiringDate },#{count },#{condition })
+	</insert>
+
+	<!-- 查询影片数目 -->
+	<select id="count" parameterType="map" resultType="int">
+		select count(m_id) from t_movie
+	</select>
+	
+	<!-- 查询单个影片 -->
+	<select id="unique" parameterType="Movie" resultMap="movieMap">
+		select `m_id`,`m_name`,`m_intro`,`m_score`,`m_lTid`,`m_mTid`,`m_producer`,`m_issuer`
+			,`m_director`,`m_actor`,`m_duration`,`m_time`,`m_expiringDate`,`m_count`
+		from t_movie
+		where m_id = #{id }
+	</select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

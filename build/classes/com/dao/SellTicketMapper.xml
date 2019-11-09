@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.SellTicketMapper">
+
+	<!-- 查询所有售票记录的结果集 -->
+	<resultMap type="SellTicket" id="ticketMap">
+		<id property="id" column="si_id"/>
+		<result property="time" column="si_time"/>
+		<result property="sid" column="si_schedule"/>
+		<result property="adultNum" column="si_adultNum"/>
+		<result property="totalPrice" column="si_totalPrice"/>
+		<result property="seatId" column="si_seatId"/>
+		
+		<association property="schedule" javaType="Schedule">
+		<id property="id" column="si_schedule"/>
+		<result property="startTime" column="s_startTime"/>
+		<result property="rid" column="s_rid"/>
+		<result property="price" column="s_price"/>
+		<result property="movie.name" column="m_name"/>
+		<result property="room.type" column="r_type"/>
+		<result property="sellSeat" column="s_sellSeat"/>
+		
+		</association>
+	</resultMap>
+	
+	<!-- 分页查询售票记录 -->
+	<select id="select" parameterType="map" resultMap="ticketMap">
+		select si.*,s.`s_id`,s.`s_startTime`,s.`s_rid`,s.`s_price`,
+				s.`s_sellSeat`,s.`s_mid`,m.`m_name`,r.`r_type`
+		from t_sellinformation si
+		left join t_schedule s on s.`s_id` = si.`si_schedule` 
+		left join t_movie m on m.`m_id` = s.`s_mid`
+		left join t_room r on r.`r_id` = s.`s_rid`
+	<where>
+		<if test="keyword != null">
+		m.m_name like concat('%',#{keyword},'%')
+		</if>
+		<if test="rid != null">
+		and s.s_rid = #{rid}
+		</if>		
+	</where>
+		order by si.`si_time` desc
+	<if test="start != null and size != null">
+		limit #{start},#{size}
+	</if>
+	</select>
+	
+	<!-- 查询售票总记录数 -->
+	<select id="count" parameterType="map" resultMap="ticketMap">
+		select si.*,s.`s_id`,s.`s_startTime`,s.`s_rid`,s.`s_price`,
+				s.`s_sellSeat`,s.`s_mid`,m.`m_name`,r.`r_type`
+		from t_sellinformation si
+		left join t_schedule s on s.`s_id` = si.`si_schedule` 
+		left join t_movie m on m.`m_id` = s.`s_mid`
+		left join t_room r on r.`r_id` = s.`s_rid`
+	<where>
+		<if test="keyword != null">
+		m.m_name like concat('%',#{keyword},'%')
+		</if>
+		<if test="rid != null">
+		and s.s_rid = #{rid}
+		</if>		
+	</where>
+	</select>
+	
+	<!-- 删除售票记录 -->
+	<delete id="delete" parameterType="int">
+	delete from t_sellinformation
+	where si_id = #{0}
+	</delete>
+	
+	<!-- 修改销售记录 -->
+	<update id="update" parameterType="SellTicket">
+	 update t_sellinformation 
+	<set>
+		<if test="sid != null">
+		si_schedule = #{sid},
+		</if>
+		<if test="adultNum != null">
+		si_adultNum = #{adultNum},
+		</if>
+		<if test="seatId != null">
+		si_seatId = #{seatId}
+		</if>
+	</set>
+	where si_id = #{id}
+	</update>
+	
+	<!-- 新增消费记录 -->
+	<insert id="add" parameterType="SellTicket">
+	insert into t_sellinformation(si_time,si_schedule,si_adultNum,si_totalPrice,si_seatId)
+	value(#{time},#{sid},#{adultNum},#{totalPrice},#{seatId})
+	</insert>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

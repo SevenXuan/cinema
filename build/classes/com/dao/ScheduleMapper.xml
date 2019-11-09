@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.ScheduleMapper">
+
+	<!-- 查询所有排片记录的结果集 -->
+	<resultMap type="Schedule" id="scheduleMap">
+		<id property="id" column="s_id"/>
+		<result property="mid" column="s_mid"/>
+		<result property="rid" column="s_rid"/>
+		<result property="price" column="s_price"/>
+		<result property="startTime" column="s_startTime"/>
+		<result property="endTime" column="s_endTime"/>
+		<result property="sellSeat" column="s_sellSeat"/>
+		<result property="condition" column="s_condition"/>
+		
+		<!-- 影片信息映射 -->
+		<association property="movie" javaType="Movie">
+			<id property="id" column="s_mid"/>
+			<result property="name" column="m_name"/>
+		</association>
+		
+		<!-- 影厅信息映射 -->
+		<association property="room" javaType="Room">
+			<id property="id" column="s_rid"/>
+			<result property="type" column="r_type"/>
+			<result property="seat" column="r_seat"/>
+			<result property="seatId" column="r_seatId"/>
+		</association>
+	</resultMap>
+	
+	<!-- 影厅 -->
+	<resultMap type="Room" id="roomMap">
+		<id property="id" column="r_id"/>
+		<result property="type" column="r_type"/>
+		<result property="seat" column="r_seat"/>
+		<result property="seatId" column="r_seatId"/>
+		<result property="rows" column="r_rows"/>
+		<result property="cols" column="r_cols"/>
+	</resultMap>
+	
+	<!-- 影片-->
+	<resultMap type="movie" id="movieMap">
+		<id property="id" column="m_id"/>
+		<result property="name" column="m_name"/>
+		<result property="duration" column="m_duration"/>
+	</resultMap>
+	
+	<!-- 分页查询排片记录 -->
+	<select id="select" parameterType="map" resultMap="scheduleMap">
+		select s.*, m.m_name, r.r_type from t_schedule s
+		left join t_movie m on m.m_id = s.s_mid
+		left join t_room r on r.r_id = s.s_rid
+	<where>
+		<if test="keyword != null">
+		m.m_name like concat('%',#{keyword},'%')
+		</if>
+		<if test="id != null">
+		and s.s_id = #{id}
+		</if>
+		<if test="rid != null">
+		and s.s_rid = #{rid}
+		</if>
+		<if test="condition != null">
+		and s.s_condition = #{condition}
+		</if>
+	</where>
+	order by s_startTime desc
+	<if test="start != null and size != null">
+		limit #{start},#{size}
+	</if>
+	</select>
+	
+	<!-- 删除排片记录 -->
+	<delete id="delete" parameterType="Schedule">
+	delete from t_schedule
+	where s_id = #{id}
+	</delete>
+	
+	<!-- 修改排片记录 -->
+	<update id="update" parameterType="Schedule">
+	 update t_schedule 
+	<set>
+		<if test="mid != null">
+		s_mid = #{mid},
+		</if>
+		<if test="rid != null">
+		s_rid = #{rid},
+		</if>
+		<if test="price != 0">
+		s_price = #{price},
+		</if>
+		<if test="startTime != null">
+		s_startTime = #{startTime},
+		</if>
+		<if test="endTime != null">
+		s_endTime = #{endTime},
+		</if>
+		<if test="sellSeat != null">
+		s_sellSeat = #{sellSeat},
+		</if>
+		<if test="condition != null">
+		s_condition = #{condition}
+		</if>
+	</set>
+	where s_id = #{id}
+	</update>
+	
+	<!-- 添加上映影片 -->
+	<insert id="add" parameterType="Schedule">
+	insert into t_schedule(s_mid,s_rid,s_price,s_startTime,s_endTime,s_sellSeat)
+	value(#{mid},#{rid},#{price},#{startTime},#{endTime},#{sellSeat})
+	</insert>
+	
+	<!-- 查询总记录数 -->
+	<select id="count" parameterType="map" resultType="int">
+		select count(s_id) from t_schedule s
+		left join t_movie m on m.m_id = s.s_mid
+		left join t_room r on r.r_id = s.s_rid
+	<where>
+		<if test="keyword != null">
+		m.m_name like concat('%',#{keyword},'%')
+		</if>
+		<if test="id != null">
+		and s.s_id = #{id}
+		</if>
+		<if test="rid != null">
+		and s.s_rid = #{rid}
+		</if>
+		<if test="condition != null">
+		and s.s_condition = #{condition}
+		</if>
+	</where>
+	</select>
+	
+	<!-- 查询所有影厅 -->
+	<select id="selectRoom" resultMap="roomMap">
+		select * from t_room
+	</select>
+	
+	<!-- 更新影厅已损坏座位编号 -->
+	<update id="updateRoom" parameterType="Room">
+		update t_room 
+		<set>
+		r_seatId = #{seatId}
+		</set>
+		where r_id = #{id}
+	</update>
+	
+	<!-- 查询所有影片 -->
+	<select id="selectMovie" resultMap="movieMap">
+		select * from t_movie
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

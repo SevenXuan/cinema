@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.3.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-4.3.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+<context:annotation-config></context:annotation-config>
+
+<context:component-scan base-package="com">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+</context:component-scan>
+
+
+<context:property-placeholder location="classpath:db.properties"/>
+
+<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+	
+	<!-- <property name="driverClass" value="com.mysql.jdbc.Driver" />
+	<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/cinema-new?characterEncoding=utf-8" />
+	<property name="user" value="root" />
+	<property name="password" value="342886" /> -->
+	
+	<property name="driverClass" value="${jdbc.driver}" />
+	<property name="jdbcUrl" value="${jdbc.url}" />
+	<property name="user" value="${jdbc.username}" />
+	<property name="password" value="${jdbc.password}" />
+	
+	<property name="initialPoolSize" value="3"></property>
+	<property name="minPoolSize" value="3"></property>
+	<property name="maxPoolSize" value="15"></property>
+	<property name="acquireIncrement" value="3"></property>
+	<property name="maxIdleTime" value="1800"></property>
+	<property name="checkoutTimeout" value="10000" />
+	<property name="acquireRetryAttempts" value="2" />
+</bean>
+
+<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<property name="dataSource" ref="dataSource" />
+	<property name="configLocation" value="classpath:myBatis-config.xml" />
+	<property name="mapperLocations" value="classpath:com/dao/*.xml"></property>
+</bean>
+
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	<!-- 自动注入sqlSessionFactory实例，因此在这里不需要显示注入！ -->
+	<!-- <property name="sqlSessionFactory" value="sqlSessionFactoryBean"/> -->
+	<property name="basePackage" value="com.dao"/>
+</bean>
+
+<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="dataSource" />
+</bean>
+<tx:advice id="txAdvice" transaction-manager="txManager">
+	<tx:attributes>
+		<tx:method name="insert*" propagation="REQUIRED"
+			rollback-for="Exception" />
+		<tx:method name="update*" propagation="REQUIRED"
+			rollback-for="Exception" />
+		<tx:method name="delete*" propagation="REQUIRED"
+			rollback-for="Exception" />
+		<tx:method name="*" propagation="SUPPORTS" />
+	</tx:attributes>
+</tx:advice>
+<aop:config>
+	<aop:advisor advice-ref="txAdvice"
+		pointcut="execution(* com.service.impl.*.*(..))" />
+</aop:config>	
+</beans>
+
+
+
+
+
+
+
+
+
+
+
